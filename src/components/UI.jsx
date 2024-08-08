@@ -83,16 +83,16 @@ export const UI = () => {
         <div className="relative">
           <div className="bg-white/0  animate-horizontal-scroll flex items-center gap-8 w-max px-8">
             <h1 className="shrink-0 text-white text-10xl font-black ">
-              SJCODES
+              &#123;SJCODES&#125;
             </h1>
-            <h2 className="shrink-0 text-white text-8xl italic font-light">
-              React Three Fiber
-            </h2>
-            <h2 className="shrink-0 text-white text-12xl font-bold">
-              Three.js
-            </h2>
             <h2 className="shrink-0 text-transparent text-12xl font-bold italic outline-text">
               3D Book Slider
+            </h2>
+            <h2 className="shrink-0 text-white text-8xl italic font-light">
+              made with React Three Fiber
+            </h2>
+            <h2 className="shrink-0 text-white text-12xl font-bold">
+              &amp; Three.js
             </h2>
           </div>
         </div>
