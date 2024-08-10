@@ -9,7 +9,7 @@ import { easing } from "maath";
 import { step } from "three/examples/jsm/nodes/Nodes.js";
 
 const PAGE_WIDTH = 1.28;
-const PAGE_HEIGHT = 1.71; // 4:3 ratio
+const PAGE_HEIGHT = 1.71; // 4:3 aspect ratio
 const PAGE_DEPTH = 0.003;
 const PAGE_SEGMENTS = 30;
 const SEGMENT_WIDTH = PAGE_WIDTH / PAGE_SEGMENTS;
@@ -46,7 +46,7 @@ for (let i = 0; i < position.count; i++) {
   const x = vertex.x; // get the x poisition of the vertex
 
   const skinIndex = Math.max(0, Math.floor(x / SEGMENT_WIDTH)); // calculate the skin index
-  let skinWeight = (x % SEGMENT_WIDTH) / SEGMENT_WIDTH; // calculate the skin width
+  let skinWeight = (x % SEGMENT_WIDTH) / SEGMENT_WIDTH; // calculate the skin weight
 
   skinIndexes.push(skinIndex, skinIndex + 1, 0, 0); // set the skin indexes
   skinWeights.push(1 - skinWeight, skinWeight, 0, 0); // set the skin weights
