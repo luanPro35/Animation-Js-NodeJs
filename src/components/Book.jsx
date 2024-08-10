@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { pageAtom, pages } from "./UI";
 import { Bone, BoxGeometry, Color, Float32BufferAttribute, MathUtils, MeshStandardMaterial, SRGBColorSpace, Skeleton, SkeletonHelper, SkinnedMesh, Uint16BufferAttribute, Vector3 } from "three";
-import { useHelper, useTexture } from "@react-three/drei";
+import { useCursor, useHelper, useTexture } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import { degToRad } from "three/src/math/MathUtils.js";
 import { useAtom } from "jotai";
 import { easing } from "maath";
+import { step } from "three/examples/jsm/nodes/Nodes.js";
 
 const PAGE_WIDTH = 1.28;
 const PAGE_HEIGHT = 1.71; // 4:3 ratio
@@ -61,6 +62,7 @@ pageGeometry.setAttribute(
 );
 
 const whiteColor = new Color("white");
+const emissiveColor = new Color("orange");
 
 const pageMaterials = [
   new MeshStandardMaterial({
@@ -125,6 +127,8 @@ const Page = ({number, front, back, page, opened, bookClosed, ...props}) => {
           : {
             roughness: 0.1,
           }),
+          emissive: emissiveColor,
+          emissiveIntensity: 0,
       }),
       new MeshStandardMaterial({
         color: whiteColor,
@@ -135,8 +139,9 @@ const Page = ({number, front, back, page, opened, bookClosed, ...props}) => {
           }
           : {
             roughness: 0.1,
-          }
-        )
+          }),
+          emissive: emissiveColor,
+          emissiveIntensity: 0,
       })
     ];
     const mesh = new SkinnedMesh(pageGeometry, materials);
@@ -154,6 +159,14 @@ const Page = ({number, front, back, page, opened, bookClosed, ...props}) => {
     if(!skinnedMeshRef.current){
       return;
     }
+
+    const emissiveIntensity = highlighted ? 0.22 : 0;
+    skinnedMeshRef.current.material[4].emissiveIntensity = 
+    skinnedMeshRef.current.material[5].emissiveIntensity = MathUtils.lerp(
+      skinnedMeshRef.current.material[4].emissiveIntensity,
+      emissiveIntensity,
+      0.1
+    )
 
     if(lastOpened.current !== opened){
       turnedAt.current = +new Date();
@@ -212,10 +225,28 @@ const Page = ({number, front, back, page, opened, bookClosed, ...props}) => {
         delta
       )
     }
-  })
+  });
+
+  const[_, setPage] = useAtom(pageAtom);
+  const [highlighted, setHighlighted] = useState(false);
+  useCursor(highlighted);
 
   return (
-  <group {...props} ref={group}>
+  <group {...props} ref={group}
+  onPointerEnter={(e)=>{
+    e.stopPropagation();
+    setHighlighted(true);
+  }}
+  onPointerLeave={(e)=>{
+    e.stopPropagation();
+    setHighlighted(false);
+  }}
+  onClick={(e)=>{
+    e.stopPropagation();
+    setPage(opened ? number : number + 1);
+    setHighlighted(false);
+  }}
+  >
     <primitive 
       object={manualSkinnedMesh} 
       ref={skinnedMeshRef} 
