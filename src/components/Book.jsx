@@ -16,13 +16,51 @@ import {
   Vector3,
   PointLight, // Re-add PointLight import
 } from "three";
-import { useCursor, useHelper, useTexture } from "@react-three/drei";
+import { useCursor, useHelper, useTexture, Html } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import { degToRad } from "three/src/math/MathUtils.js";
 import { useAtom } from "jotai";
 import { easing } from "maath";
+import "./Book.css";
 
 // ... (giữ nguyên tất cả các constants và geometry setup)
+const BookInfo = ({ visible }) => (
+  <div
+    className={`text-center w-[590px] transition-opacity duration-500 ease-in-out ${
+      visible ? "opacity-100" : "opacity-0 pointer-events-none"
+    }`}
+  >
+    <h1
+      className="text-4xl sm:text-5xl font-semibold text-white leading-tight tracking-tight mt-2 mb-2"
+      style={{ textShadow: "0 0 8px rgba(0,0,0,0.9)" }}
+    >
+      Nâng tầm tri thức
+    </h1>
+    <h1
+      className="text-4xl sm:text-5xl font-semibold text-white leading-tight tracking-tight mt-2 mb-2"
+      style={{ textShadow: "0 0 8px rgba(0,0,0,0.9)" }}
+    >
+      Thông qua nghiên cứu
+    </h1>
+
+    {/* Accent line */}
+    <span className="block w-20 h-1 bg-gray-300 rounded-full mx-auto mt-4"></span>
+
+    {/* Subtext */}
+    <h3
+      className="mt-4 text-base sm:text-2xl text-gray-300 max-w-4xl mx-auto leading-relaxed"
+      style={{ textShadow: "0 0 5px rgba(0,0,0,0.9)" }}
+    >
+      Tiên phong trong các nghiên cứu liên ngành về trí tuệ nhân tạo,
+    </h3>
+    <h3
+      className="mt-4 text-base sm:text-2xl text-gray-300 max-w-4xl mx-auto leading-relaxed mb-2"
+      style={{ textShadow: "0 0 5px rgba(0,0,0,0.9)" }}
+    >
+      công nghệ bền vững và sinh học tính toán.
+    </h3>
+  </div>
+);
 
 const PAGE_WIDTH = 1.28;
 const PAGE_HEIGHT = 1.71;
@@ -409,6 +447,7 @@ export const Book = ({ ...props }) => {
   const [delayedPage, setDelayedPage] = useState(page);
   const groupRef = useRef();
   const [rotate, setRotate] = useState(false);
+  const [infoVisible, setInfoVisible] = useState(false);
 
   useEffect(() => {
     if (groupRef.current) {
@@ -423,22 +462,26 @@ export const Book = ({ ...props }) => {
   useEffect(() => {
     let timeout;
     if (page === -1) {
-      // Nếu sách đang đóng, đợi một chút rồi mới mở trang đầu tiên
       timeout = setTimeout(() => {
         setDelayedPage(0);
       }, 800);
     } else {
-      // Easing a bit the page transition
       timeout = setTimeout(() => {
         setDelayedPage(page);
       }, 300);
+    }
+    // Show info when book is opening, hide when closed or at the end
+    if (page > 0 && page < pages.length) {
+      setInfoVisible(true);
+    } else {
+      setInfoVisible(false);
     }
     return () => clearTimeout(timeout);
   }, [page]);
 
   useFrame((state, delta) => {
     if (groupRef.current) {
-      const targetRotationX = rotate ? degToRad(-60) : 0;
+      const targetRotationX = rotate ? degToRad(-50) : 0;
       easing.damp(
         groupRef.current.rotation,
         "x",
@@ -451,22 +494,27 @@ export const Book = ({ ...props }) => {
 
   return (
     <group {...props} ref={groupRef}>
-      {pages.map((p, i) => (
-        <Page
-          key={i}
-          number={i}
-          front={p.front}
-          back={p.back}
-          page={delayedPage}
-          opened={delayedPage > i}
-          bookClosed={page === 0}
-          onPageFlip={() => {
-            // This callback can be used for any page flip related effects,
-            // like playing a sound or triggering an animation.
-            // For now, it's just a placeholder.
-          }}
-        />
-      ))}
+      <group position-y={-0.5}>
+        {pages.map((p, i) => (
+          <Page
+            key={i}
+            number={i}
+            front={p.front}
+            back={p.back}
+            page={delayedPage}
+            opened={delayedPage > i}
+            bookClosed={page === 0}
+            onPageFlip={() => {
+              // This callback can be used for any page flip related effects,
+              // like playing a sound or triggering an animation.
+              // For now, it's just a placeholder.
+            }}
+          />
+        ))}
+      </group>
+      <Html center position={[0, 1.5, 0]}>
+        <BookInfo visible={infoVisible} />
+      </Html>
     </group>
   );
 };
