@@ -4,14 +4,14 @@ import { useFrame } from "@react-three/fiber";
 import {
   BufferGeometry,
   Float32BufferAttribute,
-  Points,
   PointsMaterial,
   Color,
   AdditiveBlending,
   MathUtils,
-  Vector3,
   ShaderMaterial,
-  DoubleSide,
+  Points,
+  Material,
+  NormalBufferAttributes,
 } from "three";
 
 const PARTICLE_COUNT = 200;
@@ -63,13 +63,25 @@ const sparkleFragmentShader = `
   }
 `;
 
+interface EnhancedSparkleSystemProps {
+  isActive: boolean;
+  bookPosition?: [number, number, number];
+  intensity?: number;
+}
+
 export const EnhancedSparkleSystem = ({
   isActive,
   bookPosition = [0, 0, 0],
   intensity = 1.0,
-}) => {
-  const mainSparklesRef = useRef();
-  const magicalDustRef = useRef();
+}: EnhancedSparkleSystemProps) => {
+  const mainSparklesRef = useRef<Points<
+    BufferGeometry<NormalBufferAttributes>,
+    Material | Material[]
+  > | null>(null);
+  const magicalDustRef = useRef<Points<
+    BufferGeometry<NormalBufferAttributes>,
+    Material | Material[]
+  > | null>(null);
   const timeRef = useRef(0);
 
   const particleData = useRef({
@@ -217,7 +229,7 @@ export const EnhancedSparkleSystem = ({
     }
   }
 
-  function resetParticle(index, goldColors) {
+  function resetParticle(index: number, goldColors: Color[]) {
     const spread = 2.5;
 
     // Vị trí từ trên cao
@@ -254,7 +266,7 @@ export const EnhancedSparkleSystem = ({
     particleData.current.sparkles[index] = Math.random() * Math.PI * 2;
   }
 
-  useFrame((state, delta) => {
+  useFrame((_state, delta: number) => {
     timeRef.current += delta;
 
     if (!mainSparklesRef.current || !magicalDustRef.current) return;
@@ -279,7 +291,7 @@ export const EnhancedSparkleSystem = ({
     );
   });
 
-  function updateMainSparkles(delta) {
+  function updateMainSparkles(delta: number) {
     let needsUpdate = false;
 
     for (let i = 0; i < PARTICLE_COUNT; i++) {
@@ -342,7 +354,7 @@ export const EnhancedSparkleSystem = ({
     }
   }
 
-  function updateMagicalDust(delta) {
+  function updateMagicalDust(delta: number) {
     let needsUpdate = false;
 
     for (let i = 0; i < MAGICAL_DUST_COUNT; i++) {
